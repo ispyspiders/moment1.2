@@ -1,1 +1,38 @@
-﻿
+﻿<!-- knapp att öppna menyn med på mindre skärmar-->
+<div class="header-content">
+    <button class="menu-btn open" id="menu-btn" @onclick="ToggleMenu">
+        <span class="menu-icon">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+        </span>
+    </button>
+</div>
+
+@{
+    var menuVisibleClass = _menuVisible ? "" : "visible";
+}
+
+
+<nav id="nav-menu" class="@($"{menuVisibleClass}")">
+    <ul>
+        <li>
+            <NavLink href="/" Match="NavLinkMatch.All">Hem</NavLink>
+        </li>
+        <li>
+            <NavLink href="conversion">Konvertering</NavLink>
+        </li>
+        <li>
+            <NavLink href="json">JSON</NavLink>
+        </li>
+    </ul>
+</nav>
+
+@code {
+    private bool _menuVisible = false;
+
+    private void ToggleMenu()
+    {
+        _menuVisible = !_menuVisible;
+    }
+}
