@@ -1,0 +1,57 @@
+<section>
+    <h2>Meter till fot</h2>
+    <div id="m-to-ft">
+        <div class="conversion-row">
+            <div class="input-group">
+                <label for="meters">Meter</label>
+                <input type="number" min="1" max="9999" step="any" value="@meters.ToString(cultureInfo)" @oninput=HandleInput>
+            </div>
+            <p>m</p>
+            @if (feet.HasValue)
+            {
+                <p>är </p>
+                <div class="out">
+                @feet
+            </div>
+                <p>fot</p>
+            }
+        </div>
+        @if (feet is null)
+        {
+            <p class="error">Vänligen ange ett tal mellan 1 och 9999.</p>
+        }
+    </div>
+</section>
+
+@code {
+    private double meters;
+    private double? feet;
+
+    private System.Globalization.CultureInfo cultureInfo = System.Globalization.CultureInfo.InvariantCulture;
+
+    @* Uppdatera element vid input *@
+    private void HandleInput(ChangeEventArgs e)
+    {
+        if (double.TryParse(e.Value.ToString(), cultureInfo, out double input))
+        {
+            meters = input;
+            ConvertToFeet();
+        }
+        else {
+            feet = null;
+        }
+    }
+
+    @* Konvertera från meter till fot *@
+    private void ConvertToFeet()
+    {
+        if (meters > 0)
+        {
+            feet = Math.Round(meters * 3.28084, 2);
+        }
+        else
+        {
+            feet = null;
+        }
+    }
+}
