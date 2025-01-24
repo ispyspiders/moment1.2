@@ -1,0 +1,57 @@
+<section>
+    <h2>Kilometer i timmen till miles per hour</h2>
+    <div class="conversion-block">
+        <div class="conversion-row">
+            <div class="input-group">
+                <label for="kilometers">Km/h</label>
+                <input type="number" min="5" max="9999" step="5" value="@kilometers.ToString(cultureInfo)" @oninput=HandleInput>
+            </div>
+            <p>km/h</p>
+            @if (miles.HasValue)
+            {
+                <p>är </p>
+                <div class="out">
+                @miles
+            </div>
+                <p>miles/h</p>
+            }
+        </div>
+        @if (miles is null)
+        {
+            <p class="error">Vänligen ange ett heltal mellan 1 och 9999.</p>
+        }
+    </div>
+</section>
+
+@code {
+    private double kilometers;
+    private double? miles;
+
+    private System.Globalization.CultureInfo cultureInfo = System.Globalization.CultureInfo.InvariantCulture;
+
+    @* Uppdatera element vid input *@
+    private void HandleInput(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value.ToString(), out int input))
+        {
+            kilometers = input;
+            ConvertToMiles();
+        }
+        else {
+            miles = null;
+        }
+    }
+
+    @* Konvertera från meter till miles/hour *@
+    private void ConvertToMiles()
+    {
+        if (kilometers > 0)
+        {
+            miles = Math.Round(kilometers * 0.621);
+        }
+        else
+        {
+            miles = null;
+        }
+    }
+}

@@ -1,6 +1,6 @@
 <section>
     <h2>Meter till fot</h2>
-    <div id="m-to-ft">
+    <div class="conversion-block">
         <div class="conversion-row">
             <div class="input-group">
                 <label for="meters">Meter</label>
@@ -32,6 +32,7 @@
     @* Uppdatera element vid input *@
     private void HandleInput(ChangeEventArgs e)
     {
+        if(e.Value is null) return;
         if (double.TryParse(e.Value.ToString(), cultureInfo, out double input))
         {
             meters = input;
