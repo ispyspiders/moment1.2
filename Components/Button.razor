@@ -1,0 +1,18 @@
+<button @onclick="OnButtonClick" @attributes="AdditionalAttributes">@ChildContent</button>
+
+@code {
+    @* Hantera klick *@
+    [Parameter]
+    public EventCallback<MouseEventArgs> OnClick { get; set; }
+    @* Knapp-innehåll *@
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object> AdditionalAttributes { get; set; }
+
+    private Task OnButtonClick(MouseEventArgs e)
+    {
+        return OnClick.InvokeAsync(e);
+    }
+}
