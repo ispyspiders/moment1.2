@@ -1,5 +1,148 @@
 @page "/json"
+@inject HttpClient Http
 
 <PageTitle>JSON</PageTitle>
 
 <h1>JSON</h1>
+
+@if (prognosis == null)
+{
+    <p>Laddar...</p>
+}
+else
+{
+    <p>Vädret i Skellefteå just nu:</p>
+    <p>@prognosis[0].CurrentWeatherDescription @prognosis[0].CurrentTemp &deg;C</p>
+
+
+    <table>
+    <thead>
+        <tr>
+            <td>Dag</td>
+            <td>Lägsta</td>
+            <td>Högsta</td>
+            <td>Väder</td>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var prognose in prognosis)
+            {
+                <tr>
+                    <td>@prognose.Day</td>
+                    <td>@prognose.TempMin</td>
+                    <td>@prognose.TempMax</td>
+                    <td>@prognose.WeatherDescription <img src="@prognose.WeatherImg" alt="Väder bild"></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    // Array för väderprognos
+    private WeatherPrognosis[]? prognosis;
+
+    private Dictionary<int, WeatherCondition>? weatherConditions;
+
+    // Http-anrop
+    protected override async Task OnInitializedAsync()
+    {
+        @* Läs in väderbeskrivningar från JSON-fil *@
+        weatherConditions = await Http.GetFromJsonAsync<Dictionary<int, WeatherCondition>>("weather_descriptions.json");
+
+        @*  Läs in prognos från Open-Meteo API *@
+        var weatherData = await
+        Http.GetFromJsonAsync<WeatherResponse>("https://api.open-meteo.com/v1/forecast?latitude=64.7507&longitude=20.9528&current=temperature_2m,is_day,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto");
+
+        if (weatherData != null && weatherData.daily != null && weatherData.daily.time != null && weatherConditions != null)
+        {
+            prognosis = weatherData.daily.time.Select((t, i) => new WeatherPrognosis
+                {
+                    Day = t,
+                    WeatherCode = weatherData.daily.weather_code![i],
+                    TempMax = (int)weatherData.daily.temperature_2m_max![i],
+                    TempMin = (int)weatherData.daily.temperature_2m_min![i],
+                    CurrentTemp = (int)weatherData.current?.temperature_2m!,
+                    CurrentWeatherCode = weatherData.current?.weather_code,
+                    CurrentWeatherDescription = GetWeatherCondition(weatherData.daily.weather_code![i], weatherData.current?.is_day == 1).Description,
+                    IsDay = weatherData.current?.is_day == 1,
+                    WeatherDescription = GetWeatherCondition(weatherData.daily.weather_code![i], true).Description,
+                    WeatherImg = GetWeatherCondition(weatherData.daily.weather_code![i], true).Image,
+                }).ToArray();
+        }
+        else
+        {
+            Console.WriteLine("Fel vid inläsning av väderdata");
+        }
+    }
+
+    @* Modell för väderprognos *@
+    public class WeatherPrognosis
+    {
+        public string? Day { get; set; }
+        public int? WeatherCode { get; set; }
+        public int? TempMax { get; set; }
+        public int? TempMin { get; set; }
+        public int? CurrentTemp { get; set; }
+        public int? CurrentWeatherCode { get; set; }
+        public string? CurrentWeatherDescription { get; set; }
+        public bool? IsDay { get; set; }
+        public string? WeatherDescription { get; set; }
+        public string? WeatherImg { get; set; }
+    }
+
+    @* Modell för väder-svar *@
+    public class WeatherResponse
+    {
+        public CurrentData? current { get; set; }
+        public DailyData? daily { get; set; }
+    }
+
+    // Aktuell data
+    public class CurrentData
+    {
+        public string? time { get; set; }
+        public double temperature_2m { get; set; }
+        public int is_day { get; set; }
+        public int weather_code { get; set; }
+    }
+
+    // DAGLIG data
+    public class DailyData
+    {
+        public string[]? time { get; set; }
+        public int[]? weather_code { get; set; }
+        public double[]? temperature_2m_max { get; set; }
+        public double[]? temperature_2m_min { get; set; }
+
+    }
+
+    @* Modell för väder *@
+    public class WeatherCondition
+    {
+        public WeatherDescription Day { get; set; }
+        public WeatherDescription Night { get; set; }
+    }
+
+    @* Modell för väder-beskrivning *@
+    public class WeatherDescription
+    {
+        public string Description { get; set; }
+        public string Image { get; set; }
+    }
+
+    @* Hämta beskrivning och bild för väder och dag/natt *@
+    private WeatherDescription GetWeatherCondition(int weatherCode, bool is_day)
+    {
+        var condition = weatherConditions?.ContainsKey(weatherCode) == true
+        ? weatherConditions[weatherCode]
+        : new WeatherCondition
+            {
+                Day = new WeatherDescription { Description = "Okänt väder", Image = "http://openweathermap.org/img/wn/50d@2x.png" },
+                Night = new WeatherDescription { Description = "Okänt väder", Image = "http://openweathermap.org/img/wn/50n@2x.png" }
+            };
+
+        if (is_day) return condition.Day;
+        else return condition.Night;
+    }
+}
