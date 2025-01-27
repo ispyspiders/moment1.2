@@ -1,0 +1,75 @@
+#weather-container {
+    width: fit-content;
+    border-radius: 20px;
+}
+
+.day {
+    background: url(../images/day.jpg);
+    background-size: cover;
+}
+
+.night {
+    background: url(../images/night.jpg);
+    background-size: cover;
+}
+
+#current {
+    padding: 1.5rem 1rem 0.5rem 1rem;
+    color: #fff;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+}
+
+#current h2 {
+    font-size: 2.5rem;
+    margin: 0;
+}
+
+#current .temp {
+    margin-bottom: 1rem;
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+#current div {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: space-evenly;
+}
+
+#current div p {
+    margin: 0;
+}
+
+#current div img {
+    width: 3.5rem;
+}
+
+table {
+    background-color: rgba(232, 244, 246, 0.75);
+    border-collapse: collapse;
+}
+
+thead tr td {
+    border-top:none;
+    font-weight: 700;
+}
+
+td {
+    padding: 0.5rem 1rem;
+    border-top: 1px solid #2D2D4B;
+    font-size: 1rem;
+}
+
+td img{
+    width: 2.5rem;
+
+}
+
+.center {
+    text-align: center;
+    margin: auto;
+}

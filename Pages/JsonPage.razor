@@ -4,38 +4,53 @@
 <PageTitle>JSON</PageTitle>
 
 <h1>JSON</h1>
-
+<p>Den här sidan använder HttpClient för att läsa in data i JSON-format. Den läser in väderprognos för Skellefteå från <a href="https://open-meteo.com/">Open Meteo</a>s öppna väder-API och beskrivningar av väderkoder och bilder från en lokal JSON-fil. Beskrivningarna är skapade av Stellesphere och kan hittas här: <a href="https://gist.github.com/stellasphere/9490c195ed2b53c707087c8c2db4ec0c">WMO weather interpretation code descriptions (& images)</a>
+</p>
 @if (prognosis == null)
 {
     <p>Laddar...</p>
 }
 else
 {
-    <p>Vädret i Skellefteå just nu:</p>
-    <p>@prognosis[0].CurrentWeatherDescription @prognosis[0].CurrentTemp &deg;C</p>
+    @* Visa bakgrundsbild beroende på om dag/natt *@
+    <div id="weather-container" class="@(prognosis[0].IsDay ? "day" : "night")">
 
+        @* Aktuellt väder *@
+        <div id="current">
+            <h2>Skellefteå</h2>
+            <div>
+                <p class="temp">@prognosis[0].CurrentTemp &deg;C</p> 
+                <p>@prognosis[0].CurrentWeatherDescription</p>
+                <img src="@prognosis[0].CurrentWeatherImg" alt="aktuellt väder">
+            </div>
+        </div>
 
-    <table>
-    <thead>
-        <tr>
-            <td>Dag</td>
-            <td>Lägsta</td>
-            <td>Högsta</td>
-            <td>Väder</td>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var prognose in prognosis)
-            {
+        <table>
+            <thead>
                 <tr>
-                    <td>@prognose.Day</td>
-                    <td>@prognose.TempMin</td>
-                    <td>@prognose.TempMax</td>
-                    <td>@prognose.WeatherDescription <img src="@prognose.WeatherImg" alt="Väder bild"></td>
+                    <td>Dag</td>
+                    <td>Lägsta</td>
+                    <td>Högsta</td>
+                    <td>Väder</td>
+                    <td></td>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @foreach (var prognose in prognosis)
+                {
+                    <tr>
+                        <td>@prognose.Day</td>
+                        <td class="center">@prognose.TempMin</td>
+                        <td class="center">@prognose.TempMax</td>
+                        <td>@prognose.WeatherDescription</td>
+                        <td>
+                            <img src="@prognose.WeatherImg" alt="Väder bild">
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 }
 
 @code {
@@ -64,7 +79,10 @@ else
                     TempMin = (int)weatherData.daily.temperature_2m_min![i],
                     CurrentTemp = (int)weatherData.current?.temperature_2m!,
                     CurrentWeatherCode = weatherData.current?.weather_code,
-                    CurrentWeatherDescription = GetWeatherCondition(weatherData.daily.weather_code![i], weatherData.current?.is_day == 1).Description,
+                    CurrentWeatherDescription = GetWeatherCondition(weatherData.daily.weather_code![i], weatherData.current?.is_day ==
+                1).Description,
+                    CurrentWeatherImg = GetWeatherCondition(weatherData.daily.weather_code![i], weatherData.current?.is_day ==
+                1).Image,
                     IsDay = weatherData.current?.is_day == 1,
                     WeatherDescription = GetWeatherCondition(weatherData.daily.weather_code![i], true).Description,
                     WeatherImg = GetWeatherCondition(weatherData.daily.weather_code![i], true).Image,
@@ -86,7 +104,8 @@ else
         public int? CurrentTemp { get; set; }
         public int? CurrentWeatherCode { get; set; }
         public string? CurrentWeatherDescription { get; set; }
-        public bool? IsDay { get; set; }
+        public string? CurrentWeatherImg { get; set; }
+        public bool IsDay { get; set; }
         public string? WeatherDescription { get; set; }
         public string? WeatherImg { get; set; }
     }
